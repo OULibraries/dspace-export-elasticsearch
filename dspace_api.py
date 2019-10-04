@@ -20,16 +20,16 @@ retrieve:
 class dspace_api:
     def __init__(self):
         """Object defintions:
-              baseURL:
+              - baseURL:
                 - DSpace URL stored in a secrets file, secrets.py,
                   this will need to be created/modified.
-              email:
+              - email:
                 - Email to use for authentication, stored in a secrets file, secrets.py,
                   this will need to be created/modified.
-              password:
+              - password:
                 - Password used for authentication, stored in a secrets file, secrets.py,
                   this will need to be created/modified.
-              verify:
+              - verify:
                 - SSL verification flag, stored in a secrets file, secrets.py,
                   this will need to be created/modified.
         """
@@ -44,11 +44,11 @@ class dspace_api:
     def authenticate(self):
         """This function creates an authenticated DSpace REST API Session
 
-        Keyword arguments:
-        None
+            Keyword arguments:
+            - None
         
-        Returns:
-        None
+            Returns:
+            - None
         """
         # authentication
         self.data = {'email': self.email, 'password': self.password}
@@ -71,10 +71,10 @@ class dspace_api:
         """This function logs out of an authenticated DSpace REST API Session
 
         Keyword arguments:
-        None
+        - None
         
         Returns:
-        None
+        - None
         """
         requests.post(self.baseURL + '/rest/logout', headers=self.header, verify=self.verify,
                                 cookies=self.cookies)
@@ -86,14 +86,20 @@ class dspace_api:
         """Retrieve a list of parsed and formatted items
 
         Keyword arguments:
-        limit -- the batch size to return for each item query pass (default 50)
-        query_field -- the field in which you are filtering against (default dc.title)
-        query_operator -- the operation you are using to for matched fields (defualt exists)
-        query_value -- the value you are filtering on (default '')
-        expand -- extra fields to return (default all)
+        - limit 
+            - the batch size to return for each item query pass (default 50)
+        - query_field
+            - the field in which you are filtering against (default dc.title)
+        - query_operator
+            - the operation you are using to for matched fields (defualt exists)
+        - query_value
+            - the value you are filtering on (default '')
+        - expand
+            - extra fields to return (default all)
 
         Returns:
-        itemlist: A list containing parsed JSON item records 
+        - itemlist
+            - A list containing parsed JSON item records 
         """
 
         print("Get items")

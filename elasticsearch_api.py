@@ -13,12 +13,11 @@ upload:
 
 class elasticsearch_api:
     def __init__(self):
-        """
-        Object defintions:
-              es_host:
+        """Object defintions:
+            - es_host:
                 - Elasticsearch URL, stored in a secrets file, secrets.py,
                   this will need to be created/modified.
-              es_index:
+            - es_index:
                 - Elasticsearch Index to upload documents to, stored in a secrets file, secrets.py,
                   this will need to be created/modified.
 
@@ -30,10 +29,11 @@ class elasticsearch_api:
         """This function loops through a provided list of JSON Records and uploads them to an Elasticsearch Index
 
         Parameters:
-        itemlist -- List of JSON Records
+        - itemlist:
+            - List of JSON Records
 
         Returns:
-        None
+        - None
         """
 
         print("Number of Records: ", len(itemlist))
