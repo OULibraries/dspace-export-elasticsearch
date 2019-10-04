@@ -53,7 +53,7 @@ while items != []:
         items = requests.get(baseURL
                              + '/rest/filtered-items', params=filter, headers=header,
                              cookies=cookies, verify=verify)
-    filter['offset'] += 50
+    filter['offset'] += filter['limit']
     print("At offset: ", filter['offset'])
     items = items.json()['items']
     
@@ -61,50 +61,50 @@ while items != []:
 
     # Loop through retrieved batch
     for item in items:
-        ti = {}
+        current_record = {}
         policies = []
-        elist = []
-        ti['uuid'] = item['uuid']
-        ti['parentCollection'] = item['parentCollection']['name']
-        ti['parentCommunityList'] = item['parentCommunityList'][0]['name']
+        embargo_list = []
+        current_record['uuid'] = item['uuid']
+        current_record['parentCollection'] = item['parentCollection']['name']
+        current_record['parentCommunityList'] = item['parentCommunityList'][0]['name']
         bitstreams = item['bitstreams']
         # Loop through this items associated bitstreams and add relevant data to record
-        for k in range(0, len(bitstreams)):
+        for bitstream in range(0, len(bitstreams)):
             time.sleep(0.125)
-            policies.append(requests.get(baseURL + bitstreams[k]['link'] + "/policy", headers=header, cookies=cookies,
+            policies.append(requests.get(baseURL + bitstreams[bitstream]['link'] + "/policy", headers=header, cookies=cookies,
                                          verify=verify).json())
             for index in range(0, len(policies)):
-                for k in policies[index]:
-                    for l, r in k.items():
-                        ti['policies.policy' + str(index) + "." + str(l)] = r
-                        if l == 'startDate' and r is not None and r != 'null':
-                            for k in item['metadata']:
-                                if k['key'] == 'dc.date.accessioned':
+                for policy in policies[index]:
+                    for key, value in policy.items():
+                        current_record['policies.policy' + str(index) + "." + str(key)] = value
+                        if key == 'startDate' and value is not None and value != 'null':
+                            for metadata in item['metadata']:
+                                if metadata['key'] == 'dc.date.accessioned':
                                     dcAccessioned = datetime.datetime.strptime(datetime.datetime.strftime(
-                                        datetime.datetime.strptime(k['value'], "%Y-%m-%dT%H:%M:%S%z"), "%Y-%m-%d"), "%Y-%m-%d")
+                                        datetime.datetime.strptime(metadata['value'], "%Y-%m-%dT%H:%M:%S%z"), "%Y-%m-%d"), "%Y-%m-%d")
                                     etime = datetime.datetime.strptime(datetime.datetime.strftime(
-                                        datetime.datetime.strptime(r, "%Y-%m-%d"), "%Y-%m-%d"), "%Y-%m-%d")
-                                    elist.append(
+                                        datetime.datetime.strptime(value, "%Y-%m-%d"), "%Y-%m-%d"), "%Y-%m-%d")
+                                    embargo_list.append(
                                         abs((dcAccessioned - etime).days))
         # If there are associated embargo's calculate average duration for this item
-        if(len(elist) > 0):
-            ti['embargoDuration'] = sum(elist) / len(elist)
+        if(len(embargo_list) > 0):
+            current_record['embargoDuration'] = sum(embargo_list) / len(embargo_list)
         # Loop through item metadata and store Key-Value pairs as record data
-        for k in item['metadata']:
-            if k['key'].startswith("dc.date") and k['key'] != 'dc.date.accessioned':
+        for metadata in item['metadata']:
+            if metadata['key'].startswith("dc.date") and metadata['key'] != 'dc.date.accessioned':
                 # One-off user input correction, ideally this wouldn't be needed
-                if k['value'] == '20018-7':
-                    k['value'] = '2018-7'
-                if k['value'] == '0022-08-01':
-                    k['value'] = '2022-08-01'
-                k['value'] = str(dateutil.parser.parse(k['value']))
+                if metadata['value'] == '20018-7':
+                    metadata['value'] = '2018-7'
+                if metadata['value'] == '0022-08-01':
+                    metadata['value'] = '2022-08-01'
+                metadata['value'] = str(dateutil.parser.parse(metadata['value']))
 
-            if k['key'] == 'dc.rights' or k['key'] == 'dc.identifier' or k['key'] == 'dc.type' or k['key'] == 'dc.subject':
-                ti[k['key'] + '.base'] = k['value']
+            if metadata['key'] == 'dc.rights' or metadata['key'] == 'dc.identifier' or metadata['key'] == 'dc.type' or metadata['key'] == 'dc.subject':
+                current_record[metadata['key'] + '.base'] = metadata['value']
             else:
-                ti[k['key']] = k['value']
+                current_record[metadata['key']] = metadata['value']
         # Add record to item list that will be looped through and sent to Elasticsearch
-        itemlist.append(json.dumps(ti))
+        itemlist.append(json.dumps(current_record))
 
 
 print("Number of Records: ", len(itemlist))
