@@ -45,4 +45,7 @@ Example Usage:
 * Update secrets.py with local fields
 * Run dspace-elasticsearch.py
 
+License
+-------
 
+[MIT](https://github.com/OULibraries/dspace-export-elasticsearch/blob/master/LICENSE)
