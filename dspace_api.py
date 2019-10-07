@@ -135,6 +135,7 @@ class dspace_api:
                 policies = []
                 embargo_list = []
                 current_record['uuid'] = item['uuid']
+                current_record['lastModified'] = item['lastModified']
                 current_record['parentCollection'] = item['parentCollection']['name']
                 current_record['parentCommunityList'] = item['parentCommunityList'][0]['name']
                 bitstreams = item['bitstreams']
@@ -161,7 +162,7 @@ class dspace_api:
                     current_record['embargoDuration'] = sum(embargo_list) / len(embargo_list)
                 # Loop through item metadata and store Key-Value pairs as record data
                 for metadata in item['metadata']:
-                    if metadata['key'].startswith("dc.date") and metadata['key'] != 'dc.date.accessioned':
+                    if (metadata['key'].startswith("dc.date") and metadata['key'] != 'dc.date.accessioned') or metadata['key'] == 'lastModified':
                         # One-off user input correction, ideally this wouldn't be needed
                         if metadata['value'] == '20018-7':
                             metadata['value'] = '2018-7'
@@ -169,8 +170,8 @@ class dspace_api:
                             metadata['value'] = '2022-08-01'
                         metadata['value'] = str(dateutil.parser.parse(metadata['value']))
 
-                    if metadata['key'] == 'dc.rights' or metadata['key'] == 'dc.identifier' or metadata['key'] == 'dc.type' or metadata['key'] == 'dc.subject':
-                        current_record[metadata['key'] + '.base'] = metadata['value']
+                    if len(metadata['key'].split(".")) < 3:
+                        current_record[metadata['key'] + '.text'] = metadata['value']
                     else:
                         current_record[metadata['key']] = metadata['value']
                 # Add record to item list that will be looped through and sent to Elasticsearch
