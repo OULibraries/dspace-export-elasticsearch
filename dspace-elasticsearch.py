@@ -25,7 +25,7 @@ def main():
     dapi = dspace_api()
     dapi.authenticate()
     es = elasticsearch_api()
-    items = dapi.retrieve(limit=50, query_field='dc.date.accessioned',
+    items = dapi.retrieve(limit=50, query_field='lastModified',
                           query_operator='like',
                           query_value=str(datetime.date.strftime(datetime.date.today() - datetime.timedelta(1), '%Y-%m-%d')) + '%',
                           expand='all')
