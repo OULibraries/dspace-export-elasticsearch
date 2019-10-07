@@ -1,5 +1,6 @@
 import requests
 import secrets
+import json
 
 """
 This object contains functions to connect to an Elasticsearch REST API endpoint as well as upload parsed records
@@ -40,6 +41,7 @@ class elasticsearch_api:
         # Loop through all retrieved items and send to configured Elasticsearch, creating a new document for each record
         for record in itemlist:
             print(record)
-            m = requests.post(self.es_host+ "/"+self.es_index+"/_doc",
+            m = requests.put(self.es_host+ "/"+self.es_index+"/_doc/"+json.loads(record)['uuid'],
                             headers={"Content-Type": "application/json"}, data=record)
             print(m.text)
+    
